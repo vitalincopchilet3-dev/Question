@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini quiz</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      background: #0b0f19; color: #e9eefc;
+    }
+    .card{
+      width:min(620px,92vw);
+      background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:18px;
+      padding:22px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+    }
+    h1{ margin:0 0 8px; font-size:20px; }
+    .muted{ opacity:.8; font-size:14px; margin-bottom:16px; }
+    .q{ margin:18px 0 10px; font-size:16px; }
+    .choices{ display:grid; gap:10px; margin-bottom:10px; }
+    button.choice{
+      text-align:left; padding:12px 14px; border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: inherit; cursor:pointer;
+      transition: transform .06s ease, background .2s ease;
+    }
+    button.choice:hover{ background: rgba(255,255,255,0.10); transform: translateY(-1px); }
+    .bar{ height:8px; border-radius:999px; background: rgba(255,255,255,0.08); overflow:hidden; margin:10px 0 6px; }
+    .bar>div{ height:100%; width:0%; background: rgba(255,255,255,0.35); transition: width .35s ease; }
+    .footer{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:14px; font-size:13px; opacity:.85; flex-wrap:wrap;}
+    .pill{ padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
+    .center{text-align:center;}
+    .big{ font-size:22px; margin:8px 0 12px; }
+    .heart{ filter: drop-shadow(0 10px 24px rgba(255,0,90,0.18)); font-size:26px; }
+
+    /* Valentine */
+    .gif{
+      width:min(280px, 70vw);
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:0 10px 24px rgba(0,0,0,0.35);
+      margin: 10px auto 14px;
+      display:block;
+    }
+    .btnRow{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .val-btn{
+      padding:12px 18px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      color: inherit;
+      cursor:pointer;
+      font-weight:700;
+      transition: transform .08s ease, background .2s ease;
+      user-select:none;
+      touch-action: manipulation;
+      transform-origin: center;
+    }
+    .val-btn:hover{ background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+    #yesBtn{
+      background: rgba(60, 255, 170, 0.12);
+      border-color: rgba(60,255,170,0.28);
+    }
+    #yesBtn:hover{ background: rgba(60, 255, 170, 0.18); }
+  </style>
+</head>
+<body>
+  <div class="card"><div id="app"></div></div>
+
+  <script>
+    // --- 1) Questions de culture G ---
+    const quiz = [
+      { q: "Quelle est la capitale de l’Italie ?", choices: ["Milan", "Rome", "Venise", "Naples"], answer: 1 },
+      { q: "Combien de continents existe-t-il ?", choices: ["5", "6", "7", "8"], answer: 2 },
+      { q: "Quel est le plus grand océan du monde ?", choices: ["Atlantique", "Indien", "Pacifique", "Arctique"], answer: 2 },
+      { q: "Combien font 9 × 7 ?", choices: ["56", "63", "72", "49"], answer: 1 },
+      { q: "Quelle planète est surnommée la planète rouge ?", choices: ["Vénus", "Mars", "Jupiter", "Mercure"], answer: 1 }
+    ];
+
+    // --- 2) Textes qui changent quand elle clique "Non" ---
+    const noPhrases = [
+      "Non",
+      "T’es sûre ?",
+      "Vraiment ? 🥺",
+      "Allez stp 😭",
+      "Promis ça sera bien 💘",
+      "Dernière chance 😳",
+      "Ok… mais… 😔",
+      "Bon… dis oui 😅"
+    ];
+
+    // --- 3) GIF nounours câlin (remplace l’URL si tu veux EXACTEMENT un autre) ---
+    // Si tu as le lien exact du GIF que tu veux, colle-le ici.
+    const bearGifUrl = "https://media.giphy.com/media/l4FGpPki5v2Bcd6Ss/giphy.gif";
+
+    const app = document.getElementById("app");
+    let idx = 0;
+    let score = 0;
+
+    function progressHTML() {
+      const pct = Math.round((idx / quiz.length) * 100);
+      return `
+        <div class="bar"><div style="width:${pct}%"></div></div>
+        <div class="footer">
+          <span class="pill">Question ${Math.min(idx+1, quiz.length)} / ${quiz.length}</span>
+          <span class="pill">Score: ${score}</span>
+        </div>
+      `;
+    }
+
+    function renderQuestion() {
+      const item = quiz[idx];
+      app.innerHTML = `
+        <h1>Mini quiz 🧠</h1>
+        <div class="muted">Réponds vite, c’est juste pour s’amuser 😉</div>
+        ${progressHTML()}
+        <div class="q">${item.q}</div>
+        <div class="choices">
+          ${item.choices.map((c, i) => `<button class="choice" data-i="${i}">${c}</button>`).join("")}
+        </div>
+        <div class="muted">Clique sur une réponse pour continuer.</div>
+      `;
+
+      app.querySelectorAll("button.choice").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.dataset.i);
+          if (i === item.answer) score++;
+          idx++;
+          if (idx < quiz.length) renderQuestion();
+          else renderValentine();
+        });
+      });
+    }
+
+    function renderValentine() {
+      app.innerHTML = `
+        <div class="center">
+          <div class="heart">💘</div>
+          <div class="big">Dernière question (la plus importante)</div>
+          <div class="q" style="font-size:18px;">Tu veux être ma valentine ?</div>
+          <img class="gif" src="${bearGifUrl}" alt="bear hug gif">
+          <div class="btnRow">
+            <button class="val-btn" id="noBtn">${noPhrases[0]}</button>
+            <button class="val-btn" id="yesBtn">Oui</button>
+          </div>
+          <div class="footer" style="justify-content:center; margin-top:16px;">
+            <span class="pill">Score final: ${score} / ${quiz.length}</span>
+          </div>
+        </div>
+      `;
+
+      const noBtn = document.getElementById("noBtn");
+      const yesBtn = document.getElementById("yesBtn");
+
+      let noCount = 0;
+
+      noBtn.addEventListener("click", () => {
+        noCount++;
+
+        // Change le texte du bouton Non
+        const phrase = noPhrases[Math.min(noCount, noPhrases.length - 1)];
+        noBtn.textContent = phrase;
+
+        // Agrandit progressivement le Oui
+        // (plus elle dit non, plus le oui grossit)
+        const scale = Math.min(1 + noCount * 0.18, 2.6);
+        yesBtn.style.transform = `scale(${scale})`;
+
+        // Petit effet bonus: le Non rapetisse un peu
+        const noScale = Math.max(1 - noCount * 0.06, 0.78);
+        noBtn.style.transform = `scale(${noScale})`;
+      });
+
+      yesBtn.addEventListener("click", () => {
+        app.innerHTML = `
+          <div class="center">
+            <div class="heart" style="font-size:34px;">💖</div>
+            <div class="big">Yesss !</div>
+            <img class="gif" src="${bearGifUrl}" alt="bear hug gif">
+            <div class="q">Trop content 😄</div>
+            <div class="muted">On se fait une petite soirée à distance ? Film / jeu / visio ?</div>
+            <div class="footer" style="justify-content:center; margin-top:16px;">
+              <span class="pill">Valentine: ✅</span>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>
