@@ -1,203 +1,117 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini Quiz</title>
+  <meta charset="utf-8">
+  <title>Quiz</title>
   <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body { margin:0; min-height:100vh; display:grid; place-items:center; background:#0b0f19; color:#e9eefc; }
+    body{
+      background:#0b0f19;
+      color:white;
+      font-family:Arial;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      margin:0;
+      text-align:center;
+    }
+
     .card{
-      width:min(680px, 92vw);
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 18px;
-      padding: 22px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-      backdrop-filter: blur(10px);
-    }
-    h1{ margin:0 0 8px; font-size:20px; }
-    .muted{ opacity:.8; font-size:14px; margin-bottom:14px; }
-    .q{ margin:18px 0 10px; font-size:16px; }
-    .choices{ display:grid; gap:10px; margin-bottom:10px; }
-    button.choice{
-      text-align:left; padding:12px 14px; border-radius:14px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color: inherit; cursor:pointer;
-      transition: transform .06s ease, background .2s ease;
-    }
-    button.choice:hover{ background: rgba(255,255,255,0.10); transform: translateY(-1px); }
-    .bar{ height:8px; border-radius:999px; background: rgba(255,255,255,0.08); overflow:hidden; margin:10px 0 6px; }
-    .bar>div{ height:100%; width:0%; background: rgba(255,255,255,0.35); transition: width .35s ease; }
-    .footer{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:14px; font-size:13px; opacity:.85; flex-wrap:wrap;}
-    .pill{ padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
-    .center{text-align:center;}
-    .big{ font-size:22px; margin:8px 0 12px; }
-    .heart{ font-size:28px; filter: drop-shadow(0 10px 24px rgba(255,0,90,0.18)); }
-
-    .media{
-      width:min(420px, 86vw);
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,0.10);
-      box-shadow:0 10px 24px rgba(0,0,0,0.35);
-      margin: 10px auto 14px;
-      display:block;
-      background: rgba(255,255,255,0.03);
+      background:rgba(255,255,255,0.05);
+      padding:25px;
+      border-radius:15px;
+      width:420px;
     }
 
-    .btnRow{ display:flex; justify-content:center; align-items:center; gap:14px; flex-wrap:wrap; margin-top: 8px; }
-    .val-btn{
-      padding:12px 18px; border-radius:999px;
-      border:1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.08);
-      color: inherit; cursor:pointer;
-      font-weight:800;
-      transition: transform .12s ease, background .2s ease;
-      user-select:none; touch-action: manipulation;
+    button{
+      padding:10px 15px;
+      margin:6px;
+      border:none;
+      border-radius:8px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:transform .2s;
     }
-    #yesBtn{
-      background: rgba(60, 255, 170, 0.14);
-      border-color: rgba(60,255,170,0.30);
-      transform-origin: center;
+
+    #yesBtn{ background:#2ecc71; color:white; }
+    #noBtn{ background:#e74c3c; color:white; }
+
+    img{
+      width:260px;
+      border-radius:12px;
+      margin:12px 0;
     }
-    #noBtn{
-      background: rgba(255, 90, 90, 0.12);
-      border-color: rgba(255,90,90,0.28);
-      transform-origin: center;
+
+    .bigLove{
+      font-size:48px;
+      font-weight:900;
+      color:#ff4d6d;
+      margin-top:20px;
     }
   </style>
 </head>
 <body>
-  <div class="card"><div id="app"></div></div>
 
-  <script>
-    // ✅ GIF pendant la question Valentine (celui que tu as donné)
-    const QUESTION_GIF_URL = "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXdjc2EwOHl6bWNlc3hka2UzNjFoOHUyajhiMTlrMXZrN3A2OGV4dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/16OzPTMlBMiH6Yze1n/giphy.gif";
+<div class="card" id="app"></div>
 
-    // ⚠️ ICI tu dois mettre l'URL de TON image finale (4 chats + drapeau Moldavie)
-    // Options faciles :
-    // - soit tu l'héberges (imgur, postimg, etc.) et tu colles le lien direct .png/.jpg
-    // - soit tu l'ajoutes dans ton repo et tu mets: "./chat-moldavie.png"
-    const YES_IMAGE_URL = "./TON_IMAGE_CHAT_MOLDAVIE.png";
+<script>
+const quiz = [
+  { q:"Quelle est la capitale de l’Italie ?", choices:["Milan","Rome","Venise"], answer:1 },
+  { q:"Combien font 9 × 7 ?", choices:["63","72","56"], answer:0 }
+];
 
-    // Quiz rapide (tu peux changer/ajouter des questions)
-    const quiz = [
-      { q: "Quelle est la capitale de l’Italie ?", choices: ["Milan", "Rome", "Venise", "Naples"], answer: 1 },
-      { q: "Combien de continents existe-t-il ?", choices: ["5", "6", "7", "8"], answer: 2 },
-      { q: "Quel est le plus grand océan du monde ?", choices: ["Atlantique", "Indien", "Pacifique", "Arctique"], answer: 2 },
-      { q: "Combien font 9 × 7 ?", choices: ["56", "63", "72", "49"], answer: 1 }
-    ];
+let index=0;
+const app=document.getElementById("app");
 
-    const noPhrases = [
-      "Non",
-      "T’es sûre ?",
-      "Vraiment ? 🥺",
-      "Allez stp 😭",
-      "Dis oui 😅",
-      "Ok… mais… 😔",
-      "Dernière chance 😳",
-      "Bon… OUI 😏"
-    ];
+function renderQuestion(){
+  const item=quiz[index];
+  app.innerHTML=`
+    <h2>${item.q}</h2>
+    ${item.choices.map((c,i)=>`<button onclick="answer(${i})">${c}</button>`).join("")}
+  `;
+}
 
-    const app = document.getElementById("app");
-    let idx = 0;
-    let score = 0;
+function answer(i){
+  index++;
+  if(index<quiz.length) renderQuestion();
+  else renderValentine();
+}
 
-    function progressHTML() {
-      const pct = Math.round((idx / quiz.length) * 100);
-      return `
-        <div class="bar"><div style="width:${pct}%"></div></div>
-        <div class="footer">
-          <span class="pill">Question ${Math.min(idx+1, quiz.length)} / ${quiz.length}</span>
-          <span class="pill">Score: ${score}</span>
-        </div>
-      `;
-    }
+const questionGif="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXdjc2EwOHl6bWNlc3hka2UzNjFoOHUyajhiMTlrMXZrN3A2OGV4dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/16OzPTMlBMiH6Yze1n/giphy.gif";
+const yesGif="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdnN2cXNpNGR0Ymg1ZW1rc3ppcHp0ZnI4YXYzdzBjdGVwZnBlZmFkbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/T70hpBP1L0N7U0jtkq/giphy.gif";
 
-    function renderQuestion() {
-      const item = quiz[idx];
-      app.innerHTML = `
-        <h1>Mini quiz 🧠</h1>
-        <div class="muted">Petit quiz tranquille… 😉</div>
-        ${progressHTML()}
-        <div class="q">${item.q}</div>
-        <div class="choices">
-          ${item.choices.map((c, i) => `<button class="choice" data-i="${i}">${c}</button>`).join("")}
-        </div>
-        <div class="muted">Clique sur une réponse pour continuer.</div>
-      `;
+const noTexts=["Non","T’es sûre ?","Vraiment ?","Allez stp","Dernière chance"];
 
-      app.querySelectorAll("button.choice").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const i = Number(btn.dataset.i);
-          if (i === item.answer) score++;
-          idx++;
-          if (idx < quiz.length) renderQuestion();
-          else renderValentine();
-        });
-      });
-    }
+function renderValentine(){
+  app.innerHTML=`
+    <h2>Saynela veux tu être ma valentine pour cette Saint-Valentin et le reste de ta vie ?</h2>
+    <img src="${questionGif}">
+    <div>
+      <button id="noBtn">${noTexts[0]}</button>
+      <button id="yesBtn">Oui</button>
+    </div>
+  `;
 
-    function renderValentine() {
-      app.innerHTML = `
-        <div class="center">
-          <div class="heart">💘</div>
-          <div class="big">Dernière question</div>
-          <div class="q" style="font-size:18px;">Tu veux être ma valentine ?</div>
-          <img class="media" src="${QUESTION_GIF_URL}" alt="gif valentine">
-          <div class="btnRow">
-            <button class="val-btn" id="noBtn">${noPhrases[0]}</button>
-            <button class="val-btn" id="yesBtn">Oui</button>
-          </div>
-          <div class="footer" style="justify-content:center; margin-top:14px;">
-            <span class="pill">Score final: ${score} / ${quiz.length}</span>
-          </div>
-        </div>
-      `;
+  let noCount=0;
+  const noBtn=document.getElementById("noBtn");
+  const yesBtn=document.getElementById("yesBtn");
 
-      const noBtn = document.getElementById("noBtn");
-      const yesBtn = document.getElementById("yesBtn");
+  noBtn.onclick=()=>{
+    noCount++;
+    yesBtn.style.transform="scale("+(1+noCount*0.4)+")";
+    noBtn.innerText=noTexts[Math.min(noCount,noTexts.length-1)];
+  };
 
-      let noCount = 0;
+  yesBtn.onclick=()=>{
+    app.innerHTML=`
+      <img src="${yesGif}">
+      <div class="bigLove">TE IUBESC !!</div>
+    `;
+  };
+}
 
-      // ✅ Oui devient "vraiment plus gros" :
-      // on utilise une croissance exponentielle + un plafond
-      function computeYesScale(n) {
-        const scale = 1.0 * Math.pow(1.35, n); // 1.35^n => grossit vite
-        return Math.min(scale, 6.0);           // plafond pour éviter de casser l’écran
-      }
+renderQuestion();
+</script>
 
-      noBtn.addEventListener("click", () => {
-        noCount++;
-
-        // Texte du Non
-        noBtn.textContent = noPhrases[Math.min(noCount, noPhrases.length - 1)];
-
-        // Grossissement agressif du Oui
-        const s = computeYesScale(noCount);
-        yesBtn.style.transform = `scale(${s})`;
-
-        // Petit effet: Non rapetisse légèrement
-        const ns = Math.max(1 - noCount * 0.08, 0.55);
-        noBtn.style.transform = `scale(${ns})`;
-      });
-
-      yesBtn.addEventListener("click", () => {
-        app.innerHTML = `
-          <div class="center">
-            <div class="heart" style="font-size:34px;">💖</div>
-            <div class="big">Yesss !</div>
-            <div class="muted">Regarde 🥹</div>
-            <img class="media" src="${YES_IMAGE_URL}" alt="image chats moldavie"
-                 onerror="this.outerHTML='<div class=&quot;muted&quot; style=&quot;margin-top:10px;&quot;>⚠️ Image introuvable. Mets ton image dans le repo (ex: chat-moldavie.png) puis remplace YES_IMAGE_URL par &quot;./chat-moldavie.png&quot;.</div>';">
-            <div class="q">Maintenant, on se fait une soirée à distance ? 😄</div>
-          </div>
-        `;
-      });
-    }
-
-    renderQuestion();
-  </script>
 </body>
 </html>
